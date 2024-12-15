@@ -5,21 +5,21 @@ import os
 from pygame import mixer
 from typing import List, Tuple
 
-# Inicjalizacja Pygame
+# initialization Pygame
 pygame.init()
 mixer.init()
 
 class SpaceInvadersGame:
-    UPDATE_INTERVAL = 8  # około 120 FPS
+    UPDATE_INTERVAL = 8  # about 120 FPS
     
     def __init__(self):
-        # Ustawienia ekranu
+        # screen settings
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen_width = self.screen.get_width()
         self.screen_height = self.screen.get_height()
         pygame.display.set_caption("Space Invaders")
         
-        # Inicjalizacja komponentów gry
+        # initialization game components
         self.player = Player(self.screen_width // 2, self.screen_height - 50, 
                            30, 30, self.screen_width, self.screen_height)
         self.enemies: List[Enemy] = []
@@ -28,7 +28,7 @@ class SpaceInvadersGame:
         self.engine_trails: List[EngineTrail] = []
         self.smoke_particles: List[SmokeParticle] = []
         
-        # Stan gry
+        # game state
         self.score = 0
         self.game_over = False
         self.game_won = False
@@ -37,21 +37,21 @@ class SpaceInvadersGame:
         self.boss_stage = False
         self.boss = None
         self.boss_projectiles = []
-        self.points_per_hit = 10  # Początkowa wartość punktów za trafienie
+        self.points_per_hit = 10  # initial value of points for hit
         
-        # Inicjalizacja poziomu i gwiazd
+        # initialization level and stars
         self.initialize_level()
         self.initialize_stars()
         
-        # Dźwięk
+        # Sound
         self.sound_manager = SoundManager()
         self.sound_manager.start_background_music()
         
-        # Zegar gry
+        # game clock
         self.clock = pygame.time.Clock()
         
     def initialize_level(self):
-        if self.current_level > 3:  # Jeśli przekroczymy poziom 3
+        if self.current_level > 3:  # if we exceed level 3
             self.start_boss_stage()
             return
         
@@ -84,7 +84,7 @@ class SpaceInvadersGame:
     def run(self):
         running = True
         while running:
-            # Obsługa zdarzeń
+            # event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -95,13 +95,13 @@ class SpaceInvadersGame:
                 elif event.type == pygame.KEYUP:
                     self.handle_keyup(event)
 
-            # Aktualizacja stanu gry
+            # update game state
             self.update()
             
-            # Renderowanie
+            # Rendering
             self.render()
             
-            # Kontrola FPS
+            # FPS control
             self.clock.tick(120)
 
         pygame.quit()
@@ -113,11 +113,11 @@ class SpaceInvadersGame:
         keys = pygame.key.get_pressed()
         self.player.update(keys)
         
-        # Obsługa dasha (shift)
+        # Dash ability (shift)
         if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
             self.player.perform_dash()
         
-        # Strzelanie przy przytrzymaniu spacji
+        # Shooting while holding space
         if keys[pygame.K_SPACE]:
             self.handle_player_shoot()
             
@@ -130,44 +130,42 @@ class SpaceInvadersGame:
             self.update_boss()
 
     def render(self):
-        # Czyszczenie ekranu
-        self.screen.fill((0, 0, 20))  # Ciemnoniebieski kolor tła
+        # clearing screen
+        self.screen.fill((0, 0, 20))  # dark blue background
         
-        # Renderowanie wszystkich elementów
+        # rendering all elements
         self.render_stars()
         self.render_engine_trails()
         
-        # Renderowanie cząsteczek dymu
+        # rendering smoke particles
         for particle in self.smoke_particles:
             particle.draw(self.screen)
         
-        # Renderowanie przeciwników
+        # rendering enemies
         for enemy in self.enemies:
             enemy.draw(self.screen)
         
-        # Renderowanie pocisków
+        # rendering projectiles
         for projectile in self.projectiles:
             projectile.draw(self.screen)
         
-        # Renderowanie pocisków bossa
+        # rendering boss'ss projectiles
         for projectile in self.boss_projectiles:
             projectile.draw(self.screen)
         
-        # Renderowanie bossa
+        # rendering boss
         if self.boss:
             self.boss.draw(self.screen)
         
-        # Renderowanie gracza
+        # rendering player
         self.player.draw(self.screen)
         
-        # Renderowanie HUD i stanu gry
+        # rendering HUD and game state
         self.render_game_state()
         
-        # Renderowanie informacji debugowych
         if self.dev_mode_enabled():
             self.render_debug_info()
         
-        # Aktualizacja wyświetlacza
         pygame.display.flip()
 
     def handle_keydown(self, event):
@@ -177,7 +175,7 @@ class SpaceInvadersGame:
             self.handle_dev_keys(event)
 
     def handle_keyup(self, event):
-        pass  # Implementacja w razie potrzeby
+        pass 
 
     def handle_player_shoot(self):
         if self.player.can_shoot():
@@ -185,7 +183,7 @@ class SpaceInvadersGame:
                 self.player.x + self.player.width // 2,
                 self.player.y,
                 0,
-                -10  # Prędkość pocisku w górę
+                -10 
             )
             self.projectiles.append(projectile)
             self.player.shoot()
@@ -215,7 +213,7 @@ class SpaceInvadersGame:
         print(f"Rozpoczęto poziom {level}")
 
     def start_boss_stage(self):
-        if not self.boss_stage:  # Dodajemy sprawdzenie czy już nie jesteśmy w trybie bossa
+        if not self.boss_stage:  
             self.boss_stage = True
             self.enemies.clear()
             self.projectiles.clear()
@@ -231,7 +229,7 @@ class SpaceInvadersGame:
             print("Rozpoczęto walkę z bossem")
 
     def update_particles(self):
-        # Aktualizacja cząsteczek dymu
+        # smoke particles update
         for particle in self.smoke_particles[:]:
             particle.update()
             if particle.is_dead():
@@ -259,7 +257,7 @@ class SpaceInvadersGame:
             projectile.update()
             
             if projectile.is_enemy:
-                # Sprawdź kolizję z graczem dla wrogich pocisków
+                # check collision with player for enemy projectiles
                 if projectile.intersects(self.player):
                     if self.player.take_damage(10):
                         self.game_over = True
@@ -271,7 +269,7 @@ class SpaceInvadersGame:
                         self.player.height
                     )
             else:
-                # Sprawdź kolizję z przeciwnikami dla pocisków gracza
+                # check collision with enemies for player projectiles
                 hit = False
                 for enemy in self.enemies[:]:
                     if projectile.intersects(enemy):
@@ -280,27 +278,27 @@ class SpaceInvadersGame:
                             self.projectiles.remove(projectile)
                         self.enemies.remove(enemy)
                         self.enemies_defeated += 1
-                        self.score += self.points_per_hit  # Dodaj punkty za trafienie
+                        self.score += self.points_per_hit  #sum of points for hit
                         hit = True
                         break
 
-                # Jeśli pocisk uderzył w górę ekranu (nie trafił)
+                # if projectile hit the top of the screen (did not hit)
                 if not hit and projectile.y <= 0:
-                    self.points_per_hit = max(3, self.points_per_hit - 1)  # Zmniejsz punkty za trafienie
+                    self.points_per_hit = max(3, self.points_per_hit - 1)  # decrease points for hit
                     if projectile in self.projectiles:
                         self.projectiles.remove(projectile)
 
-            # Usuwanie pocisków, które wyszły poza ekran
+            # deleting projectiles that went out of the screen
             if projectile.is_out_of_bounds(self.screen_height):
                 if projectile in self.projectiles:
                     self.projectiles.remove(projectile)
 
-        # Aktualizacja pocisków bossa
+            # updating boss's projectiles
         if self.boss_stage and self.boss:
             for projectile in self.boss_projectiles[:]:
                 projectile.update()
                 
-                # Sprawdzenie kolizji z graczem
+                # check collision with player
                 if projectile.intersects(self.player):
                     if self.player.take_damage(33):
                         self.game_over = True
@@ -312,7 +310,7 @@ class SpaceInvadersGame:
                         self.player.height
                     )
                     
-                # Usuwanie pocisków bossa, które wyszły poza ekran
+                # deleting boss's projectiles that went out of the screen
                 if projectile.is_out_of_bounds(self.screen_height):
                     if projectile in self.boss_projectiles:
                         self.boss_projectiles.remove(projectile)
@@ -323,27 +321,27 @@ class SpaceInvadersGame:
             self.initialize_level()
             return
 
-        # Określ czy zostało mało przeciwników
+        # determine if there are few enemies left
         few_enemies_left = len(self.enemies) <= len(self.enemies) // 3
 
-        # Sprawdź, czy którykolwiek przeciwnik dotarł do krawędzi
+        # check if any enemy reached the edge
         change_direction = False
         for enemy in self.enemies:
             if enemy.is_at_edge():
                 change_direction = True
                 break
 
-        # Jeśli któryś przeciwnik dotarł do krawędzi, zmień kierunek wszystkich
+        # if any enemy reached the edge, change direction of all enemies
         if change_direction:
             for enemy in self.enemies:
                 enemy.reverse_direction()
-                enemy.set_target_y(enemy.y + 50)  # Obniż pozycję
+                enemy.set_target_y(enemy.y + 50)  # Lower the position
 
-        # Aktualizuj pozycje wszystkich przeciwników
+        # update positions of all enemies
         for enemy in self.enemies:
-            enemy.update(few_enemies_left)  # Przekazujemy informację o małej liczbie przeciwników
+            enemy.update(few_enemies_left)  # passing information about few enemies
             
-            # Sprawdź kolizję z graczem
+            # check collision with player
             if (enemy.x < self.player.x + self.player.width and
                 enemy.x + enemy.width > self.player.x and
                 enemy.y < self.player.y + self.player.height and
@@ -351,18 +349,18 @@ class SpaceInvadersGame:
                 self.game_over = True
                 return
 
-            # Losowe strzały przeciwników
-            if random.random() < 0.001:  # 0.1% szans na strzał w każdej klatce
+            # random enemy shooting
+            if random.random() < 0.001:  # 0.1% chance to shoot every frame
                 projectile = Projectile(
                     enemy.x + enemy.width // 2,
                     enemy.y + enemy.height,
                     0,
-                    5,  # Prędkość pocisku w dół
-                    is_enemy=True  # Oznacz pocisk jako wrogi
+                    5,  # projectile speed down
+                    is_enemy=True  # mark projectile as enemy
                 )
                 self.projectiles.append(projectile)
 
-        # Sprawdź warunki zwycięstwa poziomu
+        # check victory conditions for level
         if len(self.enemies) == 0:
             if self.current_level >= 3:
                 self.start_boss_stage()
@@ -391,13 +389,13 @@ class SpaceInvadersGame:
         
         self.boss.update(self.player.x)
         
-        # Boss atakuje
+        # Boss attacks
         if self.boss.can_attack():
             new_projectiles = self.boss.attack()
             self.boss_projectiles.extend(new_projectiles)
             self.boss.reset_attack_cooldown()
         
-        # Sprawdź czy boss został trafiony
+        # check if boss was hit
         for projectile in self.projectiles[:]:
             if projectile.intersects(self.boss):
                 self.boss.take_damage(10)
@@ -409,7 +407,7 @@ class SpaceInvadersGame:
                     20, 20
                 )
         
-        # Sprawdź czy boss został pokonany
+        # check if boss was defeated
         if self.boss.is_defeated():
             self.game_won = True
             self.boss = None
@@ -425,7 +423,6 @@ class SpaceInvadersGame:
         if not self.dev_mode_enabled():
             return
         
-        # Przykładowe informacje debugowe
         debug_info = [
             f"FPS: {int(self.clock.get_fps())}",
             f"Poziom: {self.current_level}",
@@ -480,7 +477,7 @@ class Enemy:
         self.x = x
         self.y = y
         self.speed = 4
-        self.direction = 1  # 1 dla ruchu w prawo, -1 dla ruchu w lewo
+        self.direction = 1  # 1 for right movement, -1 for left movement!
         self.width = 40 * self.SCALE
         self.height = 40 * self.SCALE
         self.velocity_x = 0
@@ -511,47 +508,40 @@ class Enemy:
 
     def reverse_direction(self):
         self.direction *= -1
-        self.base_x = self.x  # Resetuj bazową pozycję
+        self.base_x = self.x  # reset base position
 
     def update(self, few_enemies_left):
+        # Zwiększaj bezwładność z czasem
+        current_time = pygame.time.get_ticks()
+        self.inertia = min(0.98, self.inertia + 0.0001 * 
+                          (current_time - self.creation_time) / 1000.0)
+
+        # update base position X
+        self.base_x += self.speed * self.direction
+
+        # apply force in the direction of movement
+        force = self.speed * self.direction
+        
+        # add random movement when there are few enemies left
         if few_enemies_left:
-            self.individual_movement = True
-            
-        if self.individual_movement:
-            # Indywidualny ruch dla każdego przeciwnika
-            self.individual_timer += 1
-            if self.individual_timer >= self.individual_interval:
-                self.individual_timer = 0
-                # Nowy losowy cel dla każdego przeciwnika
-                self.individual_target_x = max(0, min(self.screen_width - self.width,
-                                            self.x + random.randint(-200, 200)))
-                self.individual_target_y = max(50, min(self.screen_height - 200,
-                                            self.y + random.randint(-100, 100)))
+            force *= 1.5
+            # add random movement in vertical and horizontal
+            random_x = (random.random() - 0.5) * 4
+            random_y = (random.random() - 0.5) * 2
+            self.x += random_x
+            self.y += random_y
 
-            # Płynny ruch do celu
-            dx = (self.individual_target_x - self.x) * 0.05
-            dy = (self.individual_target_y - self.y) * 0.05
-            
-            self.x += dx
-            self.y += dy
-        else:
-            # Standardowy ruch w grupie
-            current_time = pygame.time.get_ticks()
-            self.inertia = min(0.98, self.inertia + 0.0001 * 
-                             (current_time - self.creation_time) / 1000.0)
+        # update velocity and position
+        self.velocity_x = self.velocity_x * self.inertia + force * (1 - self.inertia)
+        self.x = self.base_x + self.velocity_x
 
-            self.base_x += self.speed * self.direction
-            force = self.speed * self.direction
-            
-            self.velocity_x = self.velocity_x * self.inertia + force * (1 - self.inertia)
-            self.x = self.base_x + self.velocity_x
+        # smooth lowering
+        if self.y < self.target_y:
+            self.y = min(self.y + 0.5, self.target_y)
 
-            if self.y < self.target_y:
-                self.y = min(self.y + 0.5, self.target_y)
-
-        # Ograniczenie pozycji do granic ekranu
+        # limit position to screen borders
         self.x = max(0, min(self.x, self.screen_width - self.width))
-        self.y = max(50, min(self.y, self.screen_height - self.height - 100))
+        self.y = max(50, min(self.y, self.screen_height - self.height - 100))  # added Y limit
 
     def draw(self, screen):
         if self.sprite:
@@ -580,14 +570,14 @@ class Projectile:
         self.speed_y = speed_y
         self.width = 5
         self.height = 10
-        self.is_enemy = is_enemy  # Flaga określająca, czy pocisk należy do przeciwnika
+        self.is_enemy = is_enemy  # flag indicating if projectile belongs to enemy
 
     def update(self):
         self.x += self.speed_x
         self.y += self.speed_y
 
     def draw(self, screen):
-        color = (255, 0, 0) if self.is_enemy else (255, 255, 0)  # Czerwony dla wrogów, żółty dla gracza
+        color = (255, 0, 0) if self.is_enemy else (255, 255, 0)  # red for enemies, yellow for player
         pygame.draw.rect(screen, color,
                         (self.x - self.width // 2, self.y, self.width, self.height))
 
@@ -624,7 +614,7 @@ class Star:
             self.x = random.random() * screen_width
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (255, 255, 255),  # Kolor biały
+        pygame.draw.circle(screen, (255, 255, 255),  # white color
                          (int(self.x), int(self.y)), self.size)
 
 
@@ -633,17 +623,17 @@ class EngineTrail:
         self.x = x
         self.y = y
         self.size = 5
-        self.opacity = 255  # Pełna nieprzezroczystość
+        self.opacity = 255  # full opacity
 
     def update(self):
         self.y += 2
         self.size += 1
-        self.opacity = max(0, self.opacity - 13)  # Zmniejsz nieprzezroczystość
+        self.opacity = max(0, self.opacity - 13)  # decrease opacity
 
     def draw(self, screen):
         if self.opacity > 0:
             surface = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-            pygame.draw.circle(surface, (0, 255, 255, self.opacity),  # Kolor CYAN z przezroczystością
+            pygame.draw.circle(surface, (0, 255, 255, self.opacity),  # cyan color with opacity
                              (self.size // 2, self.size // 2), self.size // 2)
             screen.blit(surface, (self.x - self.size // 2, self.y - self.size // 2))
 
@@ -669,16 +659,16 @@ class BossProjectile(Projectile):
             self.trail.pop(0)
 
     def draw(self, screen):
-        # Rysowanie smugi
+        # drawing trail
         for i, (trail_x, trail_y) in enumerate(self.trail):
             alpha = int(255 * i / len(self.trail))
             surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            pygame.draw.rect(surface, (255, 165, 0, alpha),  # Kolor pomarańczowy z przezroczystością
+            pygame.draw.rect(surface, (255, 165, 0, alpha),  # orange color with opacity
                            (0, 0, self.width, self.height))
             screen.blit(surface, (trail_x - self.width//2, trail_y - self.height//2))
 
-        # Rysowanie pocisku
-        pygame.draw.rect(screen, (255, 165, 0),  # Kolor pomarańczowy
+        # drawing projectile
+        pygame.draw.rect(screen, (255, 165, 0),  # orange color
                         (self.x - self.width//2, self.y - self.height//2, 
                          self.width, self.height))
 
@@ -692,7 +682,7 @@ class SmokeParticle:
         self.y = y
         self.size = size
         self.lifespan = 30 + int(random.random() * 30)
-        self.color = (200, 200, 200, 255)  # Kolor dymu z pełną nieprzezroczystością
+        self.color = (200, 200, 200, 255)  # smoke color with full opacity
 
     def update(self):
         self.lifespan -= 1
@@ -719,35 +709,35 @@ class Boss:
         self.height = 150
         self.health = 1000
         self.attack_cooldown = 0
-        self.speed = 2
+        self.speed = 2  # decreased speed
         self.attack_patterns = ['normal', 'spread', 'circle']
         self.current_pattern = 0
         self.pattern_change_timer = 300
         self.target_x = x
         self.target_y = y
         self.move_timer = 0
-        self.move_interval = 180
-        self.max_offset = 200
-        self.attack_cooldown_duration = 120  # Zwiększony cooldown (było 60)
+        self.move_interval = 180  # longer movement interval
+        self.max_offset = 200  # larger movement range
 
     def update(self, player_x):
-        # Aktualizacja timera ruchu
+        # update movement timer
         self.move_timer += 1
         if self.move_timer >= self.move_interval:
             self.move_timer = 0
+            # select new random target in a larger range
             self.target_x = max(0, min(800 - self.width, 
                               self.x + random.randint(-self.max_offset, self.max_offset)))
             self.target_y = max(50, min(300, 
-                              self.y + random.randint(-100, 100)))
+                              self.y + random.randint(-100, 100)))  # larger range in vertical
             
-        # Płynny ruch w kierunku celu
-        dx = (self.target_x - self.x) * 0.02
+        # smooth movement towards target
+        dx = (self.target_x - self.x) * 0.02  # slower movement
         dy = (self.target_y - self.y) * 0.02
         
         self.x += dx
         self.y += dy
         
-        # Pozostała logika bossa
+        # remaining boss logic
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
 
@@ -789,7 +779,7 @@ class Boss:
         return self.attack_cooldown == 0
 
     def reset_attack_cooldown(self):
-        self.attack_cooldown = self.attack_cooldown_duration  # Używamy nowej zmiennej
+        self.attack_cooldown = 60
 
     def take_damage(self, damage):
         self.health = max(0, self.health - damage)
@@ -816,7 +806,7 @@ class SoundManager:
     def __init__(self):
         self.background_sounds = []
         self.current_sound_index = 0
-        self.volume = 0.2  # 20% głośności
+        self.volume = 0.2  # 20% volume
 
         sound_files = [
             "space-sound-hi-109577.wav",
@@ -824,10 +814,10 @@ class SoundManager:
             "space-sound-mid-109575.wav"
         ]
 
-        # Inicjalizacja miksera
+        # initialize mixer
         pygame.mixer.init()
         
-        # Ładowanie plików dźwiękowych
+        # loading sound files
         for file in sound_files:
             try:
                 sound = pygame.mixer.Sound(file)
@@ -841,7 +831,7 @@ class SoundManager:
         if self.background_sounds:
             current_sound = self.background_sounds[self.current_sound_index]
             current_sound.play()
-            # Ustawienie callbacku do następnego utworu
+            # setting callback to next track
             pygame.mixer.music.set_endevent(pygame.USEREVENT)
 
     def next_background_track(self):
@@ -888,7 +878,7 @@ class Player:
     DASH_SPEED = 20.0
     DASH_COOLDOWN = 1000
     DASH_DURATION = 10
-    SHOT_COOLDOWN = 250  # Zwiększony cooldown strzału (było 100)
+    SHOT_COOLDOWN = 250  # increased shot cooldown (before was 100)
 
     def __init__(self, x, y, width, height, screen_width, screen_height):
         self.x = x
@@ -914,7 +904,7 @@ class Player:
         if not self.is_dashing and current_time - self.last_dash_time >= self.DASH_COOLDOWN:
             keys = pygame.key.get_pressed()
             
-            # Ustal kierunek dasha na podstawie wciśniętych klawiszy
+            # set dash direction based on pressed keys
             self.dash_direction_x = 0
             self.dash_direction_y = 0
             
@@ -923,7 +913,7 @@ class Player:
             if keys[pygame.K_UP]: self.dash_direction_y = -1
             if keys[pygame.K_DOWN]: self.dash_direction_y = 1
             
-            # Wykonaj dash tylko jeśli jest wciśnięty jakiś klawisz kierunku
+            # perform dash only if any direction key is pressed
             if self.dash_direction_x != 0 or self.dash_direction_y != 0:
                 self.is_dashing = True
                 self.dash_timer = self.DASH_DURATION
@@ -931,7 +921,7 @@ class Player:
 
     def update(self, keys):
         if self.is_dashing:
-            # Aktualizacja pozycji podczas dasha
+            # update position during dash
             self.x += self.dash_direction_x * self.DASH_SPEED
             self.y += self.dash_direction_y * self.DASH_SPEED
             
@@ -941,7 +931,7 @@ class Player:
                 self.velocity_x = 0
                 self.velocity_y = 0
         else:
-            # Normalna aktualizacja ruchu
+            # normal movement update
             if keys[pygame.K_LEFT]:
                 self.velocity_x -= self.acceleration
             if keys[pygame.K_RIGHT]:
@@ -951,33 +941,33 @@ class Player:
             if keys[pygame.K_DOWN]:
                 self.velocity_y += self.acceleration
 
-            # Zastosowanie oporu powietrza
+            # applying air resistance
             self.velocity_x *= self.deceleration
             self.velocity_y *= self.deceleration
 
-            # Ograniczenie maksymalnej prędkości
+            # limiting max speed
             speed = math.sqrt(self.velocity_x ** 2 + self.velocity_y ** 2)
             if speed > self.MAX_SPEED:
                 self.velocity_x = (self.velocity_x / speed) * self.MAX_SPEED
                 self.velocity_y = (self.velocity_y / speed) * self.MAX_SPEED
 
-            # Aktualizacja pozycji
+            # update position
             self.x += self.velocity_x
             self.y += self.velocity_y
 
-        # Ograniczenie pozycji do granic ekranu
+        # limiting position to screen boundaries
         self.x = max(0, min(self.x, self.screen_width - self.width))
         min_y = int(self.screen_height * (1 - self.VERTICAL_MOVEMENT_LIMIT))
         self.y = max(min_y, min(self.y, self.screen_height - self.height))
 
     def draw(self, screen):
-        # Rysowanie trójkątnego statku
+        # drawing triangular ship
         points = [
-            (self.x + self.width // 2, self.y),  # Dziób statku
-            (self.x, self.y + self.height),      # Lewy róg
-            (self.x + self.width, self.y + self.height)  # Prawy róg
+            (self.x + self.width // 2, self.y),  # ship's nose
+            (self.x, self.y + self.height),      # left corner
+            (self.x + self.width, self.y + self.height)  # right corner
         ]
-        pygame.draw.polygon(screen, (0, 255, 255), points)  # Kolor CYAN
+        pygame.draw.polygon(screen, (0, 255, 255), points)  # CYAN color
 
     def can_shoot(self):
         current_time = pygame.time.get_ticks()
