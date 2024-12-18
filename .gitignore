@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Pygame specific
+*.pyo
+*.pyd
+*.db
+*.log
+*.tmp
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE specific
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Pygame assets
+*.png
+*.jpg
+*.wav
+*.mp3
